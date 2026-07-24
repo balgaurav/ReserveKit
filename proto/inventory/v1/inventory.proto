@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package reservekit.inventory.v1;
+
+option go_package = "github.com/balgaurav/ReserveKit/gen/go/inventory/v1;inventoryv1";
+
+service InventoryService {
+  rpc GetAvailability(GetAvailabilityRequest) returns (GetAvailabilityResponse);
+  rpc HoldStock(HoldStockRequest) returns (HoldStockResponse);
+  rpc ReleaseStock(ReleaseStockRequest) returns (ReleaseStockResponse);
+}
+
+message GetAvailabilityRequest { string sku = 1; }
+message GetAvailabilityResponse { string sku = 1; int32 available_quantity = 2; }
+
+message HoldStockRequest {
+  string reservation_id = 1;
+  string sku = 2;
+  int32 quantity = 3;
+}
+message HoldStockResponse { int32 remaining_quantity = 1; }
+
+message ReleaseStockRequest { string reservation_id = 1; }
+message ReleaseStockResponse { int32 available_quantity = 1; }

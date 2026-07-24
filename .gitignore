@@ -1,0 +1,23 @@
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Dependencies and generated output
+node_modules/
+web/dist/
+coverage/
+*.log
+
+# Local data and containers
+*.db
+*.sqlite
+postgres-data/
+
+# Tooling and operating systems
+.DS_Store
+.idea/
+.vscode/
