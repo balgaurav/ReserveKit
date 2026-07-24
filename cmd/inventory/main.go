@@ -1,24 +1,34 @@
 package main
 
 import (
-	"encoding/json"
 	"log/slog"
-	"net/http"
+	"net"
 	"os"
+
+	inventoryv1 "github.com/balgaurav/ReserveKit/gen/go/inventory/v1"
+	"github.com/balgaurav/ReserveKit/internal/inventory"
+	"google.golang.org/grpc"
 )
 
 func main() {
-	port := os.Getenv("INVENTORY_HTTP_PORT")
+	port := os.Getenv("INVENTORY_GRPC_PORT")
 	if port == "" {
-		port = "8081"
+		port = "9090"
 	}
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok", "service": "inventory"})
-	})
-	slog.Info("inventory service bootstrap listening", "port", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+
+	listener, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		slog.Error("inventory listener failed", "error", err)
+		os.Exit(1)
+	}
+	server := grpc.NewServer()
+	inventoryv1.RegisterInventoryServiceServer(server, inventory.NewGRPCServer(inventory.NewStore(map[string]int{
+		"keyboard": 12,
+		"monitor":  8,
+		"webcam":   24,
+	})))
+	slog.Info("inventory gRPC service listening", "port", port)
+	if err := server.Serve(listener); err != nil {
 		slog.Error("inventory service stopped", "error", err)
 		os.Exit(1)
 	}
