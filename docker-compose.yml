@@ -1,0 +1,26 @@
+services:
+  inventory:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.inventory
+    environment:
+      INVENTORY_GRPC_PORT: 9090
+
+  reservation-api:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.reservation-api
+    environment:
+      RESERVATION_PORT: 8080
+      INVENTORY_GRPC_ADDRESS: inventory:9090
+    depends_on:
+      - inventory
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.web
+    ports:
+      - "5173:80"
+    depends_on:
+      - reservation-api

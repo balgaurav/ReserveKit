@@ -11,4 +11,12 @@
 3. Inventory atomically decrements available stock only once for the supplied reservation ID.
 4. The reservation API stores the lifecycle state and returns the result with the correlation ID.
 
-The initial implementation favors an explicit, observable workflow over a hidden distributed transaction. A production evolution could add an outbox and a reconciliation worker.
+The demo uses service-owned in-memory stores so it starts without cloud credentials or external data. The API and gRPC boundaries, validation, idempotency rules, and generated contracts are real. A production evolution would add separate Postgres databases, an outbox, a reconciliation worker, and authenticated service transport.
+
+## Consistency model
+
+- Inventory holds are atomic within the inventory service and idempotent by reservation ID.
+- HTTP creation is idempotent by the `Idempotency-Key` header.
+- Expired reservations release their hold when confirmation is attempted.
+- Confirmation never changes inventory because the pending hold already owns the stock.
+- Release is idempotent across API retries.
