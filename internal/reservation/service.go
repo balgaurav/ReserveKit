@@ -26,6 +26,7 @@ const (
 // Client is a narrow adapter around the generated grpc-go client. It keeps
 // reservation business rules testable without a network transport.
 type Client interface {
+	Availability(context.Context, string) (int, error)
 	Hold(context.Context, string, string, int) (int, error)
 	Release(context.Context, string) (int, error)
 }
@@ -66,44 +67,47 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (Reservation, e
 	}
 
 	s.mu.Lock()
+	defer s.mu.Unlock()
 	if existingID, ok := s.keys[input.IdempotencyKey]; ok {
-		existing := s.reservations[existingID]
-		s.mu.Unlock()
-		return existing, nil
+		return s.reservations[existingID], nil
 	}
-	s.mu.Unlock()
 
 	if _, err := s.client.Hold(ctx, input.ID, input.SKU, input.Quantity); err != nil {
 		return Reservation{}, err
 	}
 
 	reservation := Reservation{ID: input.ID, SKU: input.SKU, Quantity: input.Quantity, Status: Pending, IdempotencyKey: input.IdempotencyKey, ExpiresAt: input.ExpiresAt, CreatedAt: s.clock()}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if existingID, ok := s.keys[input.IdempotencyKey]; ok {
-		return s.reservations[existingID], nil
-	}
 	s.reservations[reservation.ID] = reservation
 	s.keys[reservation.IdempotencyKey] = reservation.ID
 	return reservation, nil
 }
 
-func (s *Service) Confirm(id string) (Reservation, error) {
+func (s *Service) Confirm(ctx context.Context, id string) (Reservation, error) {
 	s.mu.Lock()
-	defer s.mu.Unlock()
 	reservation, ok := s.reservations[id]
 	if !ok {
+		s.mu.Unlock()
 		return Reservation{}, ErrNotFound
 	}
-	if reservation.Status != Pending || !reservation.ExpiresAt.After(s.clock()) {
-		if reservation.Status == Pending {
-			reservation.Status = Expired
-			s.reservations[id] = reservation
+	if reservation.Status != Pending {
+		s.mu.Unlock()
+		return Reservation{}, fmt.Errorf("%w: %s", ErrInvalidTransition, reservation.Status)
+	}
+	if !reservation.ExpiresAt.After(s.clock()) {
+		s.mu.Unlock()
+		if _, err := s.client.Release(ctx, id); err != nil {
+			return Reservation{}, err
 		}
+		s.mu.Lock()
+		reservation = s.reservations[id]
+		reservation.Status = Expired
+		s.reservations[id] = reservation
+		s.mu.Unlock()
 		return Reservation{}, fmt.Errorf("%w: %s", ErrInvalidTransition, reservation.Status)
 	}
 	reservation.Status = Confirmed
 	s.reservations[id] = reservation
+	s.mu.Unlock()
 	return reservation, nil
 }
 
@@ -143,4 +147,11 @@ func (s *Service) Get(id string) (Reservation, error) {
 		return Reservation{}, ErrNotFound
 	}
 	return reservation, nil
+}
+
+func (s *Service) Availability(ctx context.Context, sku string) (int, error) {
+	if sku == "" {
+		return 0, ErrInvalidInput
+	}
+	return s.client.Availability(ctx, sku)
 }

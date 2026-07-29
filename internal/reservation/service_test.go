@@ -12,6 +12,9 @@ type fakeInventory struct {
 	releases int
 }
 
+func (f *fakeInventory) Availability(_ context.Context, _ string) (int, error) {
+	return 5, nil
+}
 func (f *fakeInventory) Hold(_ context.Context, _, _ string, _ int) (int, error) {
 	f.holds++
 	return 3, nil
@@ -50,9 +53,25 @@ func TestConfirmRejectsExpiredReservation(t *testing.T) {
 		t.Fatal(err)
 	}
 	service.clock = func() time.Time { return now.Add(2 * time.Minute) }
-	_, err = service.Confirm(reservation.ID)
+	_, err = service.Confirm(context.Background(), reservation.ID)
 	if !errors.Is(err, ErrInvalidTransition) {
 		t.Fatalf("confirm error = %v, want invalid transition", err)
+	}
+}
+
+func TestExpiredConfirmationReleasesInventory(t *testing.T) {
+	inventory := &fakeInventory{}
+	service := NewService(inventory)
+	now := time.Date(2026, 7, 24, 12, 0, 0, 0, time.UTC)
+	service.clock = func() time.Time { return now }
+	reservation, err := service.Create(context.Background(), CreateInput{ID: "res-1", SKU: "keyboard", Quantity: 2, IdempotencyKey: "key-1", ExpiresAt: now.Add(time.Minute)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	service.clock = func() time.Time { return now.Add(2 * time.Minute) }
+	_, _ = service.Confirm(context.Background(), reservation.ID)
+	if inventory.releases != 1 {
+		t.Fatalf("release calls = %d, want 1", inventory.releases)
 	}
 }
 
