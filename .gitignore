@@ -9,6 +9,7 @@ secrets/
 # Dependencies and generated output
 node_modules/
 web/dist/
+*.tsbuildinfo
 coverage/
 *.log
 

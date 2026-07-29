@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap');
+
+:root { font-family: Manrope, sans-serif; color: #eaf2ed; background: #09130f; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(circle at 85% 4%, #1b3d2e 0, transparent 34%), #09130f; }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+main { max-width: 1280px; margin: auto; padding: 0 40px 70px; }
+.topbar { height: 82px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #294137; }
+.brand { color: inherit; text-decoration: none; font-weight: 700; letter-spacing: -.03em; }
+.brand span { display: inline-grid; place-items: center; width: 34px; height: 34px; margin-right: 10px; border-radius: 50%; background: #ceff5c; color: #0d1f19; font: 500 12px DM Mono, monospace; }
+.service-state { color: #a5b6ad; font-size: 13px; }
+.service-state i { display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: #ceff5c; box-shadow: 0 0 12px #ceff5c; }
+.hero { padding: 76px 0 60px; display: grid; grid-template-columns: 2fr 1fr; align-items: end; gap: 40px; }
+.eyebrow { margin: 0 0 17px; color: #8fa49a; font: 500 11px DM Mono, monospace; letter-spacing: .12em; text-transform: uppercase; }
+.hero .eyebrow { grid-column: 1 / -1; margin-bottom: -20px; }
+h1 { margin: 0; font-size: clamp(60px, 8.3vw, 118px); line-height: .88; letter-spacing: -.075em; font-weight: 600; }
+h1 em { color: #ceff5c; font-style: normal; }
+.intro { max-width: 390px; margin: 0 0 4px; color: #aab8b1; line-height: 1.75; }
+.notice { margin-bottom: 20px; padding: 14px 18px; border: 1px solid #456054; border-radius: 12px; background: #15251e; color: #d6e3dc; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(300px, .75fr); border: 1px solid #294137; border-radius: 24px; overflow: hidden; background: rgba(13, 29, 22, .82); backdrop-filter: blur(14px); }
+.inventory-panel, .reservation-panel { padding: 30px; }
+.reservation-panel { border-left: 1px solid #294137; background: #0f2119; }
+.section-heading { display: flex; align-items: start; justify-content: space-between; }
+h2 { margin: 0 0 28px; font-size: 30px; letter-spacing: -.045em; }
+.text-button { border: 0; background: transparent; color: #ceff5c; font: 500 12px DM Mono, monospace; text-transform: uppercase; }
+.product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.product-card { min-height: 225px; padding: 18px; display: flex; flex-direction: column; align-items: flex-start; border: 1px solid #294137; border-radius: 16px; background: #13241d; color: inherit; text-align: left; transition: transform .2s, border-color .2s, background .2s; }
+.product-card:hover { transform: translateY(-3px); border-color: #557367; }
+.product-card.selected { border-color: #ceff5c; background: #192b23; }
+.product-index { display: grid; place-items: center; width: 38px; height: 38px; margin-bottom: auto; border-radius: 10px; background: #233a30; color: #ceff5c; font: 500 11px DM Mono, monospace; }
+.product-card strong { font-size: 15px; }
+.product-card > small { min-height: 34px; margin-top: 5px; color: #84998f; line-height: 1.45; }
+.quantity { margin-top: 20px; font: 500 29px DM Mono, monospace; }
+.quantity small { color: #84998f; font-size: 11px; }
+form { display: grid; gap: 17px; }
+label { display: grid; gap: 8px; color: #9aaca3; font: 500 11px DM Mono, monospace; letter-spacing: .08em; text-transform: uppercase; }
+input, select { width: 100%; padding: 13px 14px; border: 1px solid #355045; border-radius: 10px; outline: none; background: #132a20; color: #ecf4ef; }
+input:focus, select:focus { border-color: #ceff5c; }
+.primary { margin-top: 4px; display: flex; justify-content: space-between; padding: 14px 17px; border: 0; border-radius: 10px; background: #ceff5c; color: #102018; font-weight: 700; }
+.receipt { margin-top: 25px; padding-top: 22px; border-top: 1px solid #294137; }
+.receipt > div:first-child { display: flex; align-items: center; justify-content: space-between; }
+.receipt code { color: #789086; }
+.status { padding: 5px 9px; border-radius: 99px; background: #33483e; color: #d9e6df; font: 500 10px DM Mono, monospace; text-transform: uppercase; }
+.status.pending { background: #3d4522; color: #edff9d; }
+.status.confirmed { background: #164a33; color: #91ffc7; }
+.receipt p { color: #93a69c; line-height: 1.6; }
+.receipt strong { color: #eef5f1; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.actions button { padding: 10px; border: 1px solid #ceff5c; border-radius: 8px; background: #ceff5c; color: #102018; font-weight: 700; }
+.actions .secondary { background: transparent; color: #ceff5c; }
+.empty { margin-top: 24px; padding-top: 22px; border-top: 1px solid #294137; color: #7f958a; font-size: 14px; line-height: 1.6; }
+@media (max-width: 850px) { main { padding: 0 20px 40px; } .hero { grid-template-columns: 1fr; } .hero .eyebrow { margin-bottom: -8px; } .workspace { grid-template-columns: 1fr; } .reservation-panel { border-left: 0; border-top: 1px solid #294137; } }
+@media (max-width: 580px) { .product-grid { grid-template-columns: 1fr; } .product-card { min-height: 175px; } .topbar { height: 70px; } h1 { font-size: 58px; } }
